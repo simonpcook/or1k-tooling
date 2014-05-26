@@ -1,0 +1,46 @@
+# Set list of toolchains supported on this board
+set_board_info target_install ${target_triplet}
+
+# Load generic gdb configuration to bring in basic set of routines
+load_generic_config "gdb-comm"
+
+# We want to override some of the gdb-comm stuff we've already imported,
+# so we use our own gdb-comm file.
+search_and_load_file "library file" "gdb-comm.exp" ${boards_dir}
+
+# No multilib options needed by default
+process_multilib_options ""
+
+# Specify compilers to use
+set_board_info compiler [find_gcc]
+set_board_info cflags    "-mnewlib"
+
+# GDB protocol to be used
+set_board_info gdb_protocol "remote"
+set_board_info netport :50001
+
+# Use 'continue' instead of 'run' when executing a test
+set_board_info gdb_run_command "continue"
+
+# No support for passing arguments
+set_board_info noargs 1
+set_board_info gdb,noargs 1
+set_board_info gdb,remote_timeout "600"
+set_board_info use_gdb_stub 1
+
+# We use this to retrieve the exit code
+set gdb_print_return_code "print /u \$r3\n"
+
+# No IO (don't know really, but sounds good to me)
+set_board_info gdb,noinferiorio 1
+
+# Same for signals and return results
+#set_board_info gdb,nosignals  1
+
+# GDB can't return results
+#set_board_info gdb,noresults 1
+
+# Restrict stack size for gcc torture tests
+set_board_info gcc,stack_size 65536
+
+
