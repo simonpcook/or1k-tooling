@@ -31,7 +31,7 @@ OR1KSRC=${BASEDIR}/or1k-src
 OR1KGCC=${BASEDIR}/or1k-gcc
 
 nameTerminal "Cleaning up existing builds"
-rm -rf ${BUILDDIR} ${INSTALL}
+rm -rf ${BUILDDIR} 
 
 nameTerminal "Configuring Binutils Stage 1"
 mkcd ${BUILDDIR}/binutilss1
