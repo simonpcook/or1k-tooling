@@ -1,3 +1,9 @@
+2015-01-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* define-release.sh: New file.
+	* or1k-build-all.sh: New file.
+	* or1k-clone-all.sh: New file.
+
 2014-09-15  Simon Cook  <simon.cook@embecosm.com>
 
 	* build-elf.sh: Don't nuke the install directory.
