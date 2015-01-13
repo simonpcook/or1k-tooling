@@ -137,6 +137,22 @@ header () {
     echo "${str} ..."
 }
 
+cd_or_error () {
+    dest=$1
+    if ! cd "${dest}"
+    then
+        echo "ERROR: Failed to enter directory '${dest}'"
+        exit 1
+    fi
+}
+
+mkdir_or_error () {
+    if ! mkdir "$@"
+    then
+        echo "ERROR: Failed to mkdir $@"
+        exit 1
+    fi
+}
 
 #------------------------------------------------------------------------------
 #
@@ -165,7 +181,7 @@ opt=$1
 case ${opt} in
     --build-dir)
 	shift
-	mkdir -p $1
+	mkdir_or_error -p $1
 	builddir=$(abspath $1)
 	;;
 
@@ -240,11 +256,11 @@ then
     rm -fr ${builddir_sim}
 fi
 
-mkdir -p ${builddir_gcc_stage_1}
-mkdir -p ${builddir_gcc_stage_2}
-mkdir -p ${builddir_binutils_gdb_stage_1}
-mkdir -p ${builddir_binutils_gdb_stage_2}
-mkdir -p ${builddir_sim}
+mkdir_or_error -p ${builddir_gcc_stage_1}
+mkdir_or_error -p ${builddir_gcc_stage_2}
+mkdir_or_error -p ${builddir_binutils_gdb_stage_1}
+mkdir_or_error -p ${builddir_binutils_gdb_stage_2}
+mkdir_or_error -p ${builddir_sim}
 
 if [ "x${datestamp}" != "x" ]
 then
@@ -286,7 +302,7 @@ echo "  datestamp=${datestamp}" >> "${logfile}" 2>&1
 #--------------------------------------------------------------------------
 
 header "Configuring binutils-gdb (stage 1)"
-cd ${builddir_binutils_gdb_stage_1}
+cd_or_error ${builddir_binutils_gdb_stage_1}
 if [ \( "x${doclean}" = "x--clean" \) -o \( ! -e config.log \) ]
 then
     if ! ${OR1K_TOP}/binutils-gdb/configure --target=or1k-elf \
@@ -324,7 +340,7 @@ PATH=${installdir}/bin:$PATH
 export PATH
 
 header "Configuring GCC (stage 1)"
-cd ${builddir_gcc_stage_1}
+cd_or_error ${builddir_gcc_stage_1}
 if [ \( "x${doclean}" = "x--clean" \) -o \( ! -e config.log \) ]
 then
     if ! ${OR1K_TOP}/gcc/configure --target=or1k-elf \
@@ -355,7 +371,7 @@ then
 fi
 
 header "Configuring binutils-gdb (stage 2)"
-cd ${builddir_binutils_gdb_stage_2}
+cd_or_error ${builddir_binutils_gdb_stage_2}
 if [ \( "x${doclean}" = "x--clean" \) -o \( ! -e config.log \) ]
 then
     if ! ${OR1K_TOP}/binutils-gdb/configure --target=or1k-elf \
@@ -390,7 +406,7 @@ then
 fi
 
 header "Configuring GCC (stage 2)"
-cd ${builddir_gcc_stage_2}
+cd_or_error ${builddir_gcc_stage_2}
 if [ \( "x${doclean}" = "x--clean" \) -o \( ! -e config.log \) ]
 then
     if ! ${OR1K_TOP}/gcc/configure --target=or1k-elf \
@@ -421,7 +437,7 @@ then
 fi
 
 header "Configuring or1k sim"
-cd ${builddir_sim}
+cd_or_error ${builddir_sim}
 if [ \( "x${doclean}" = "x--clean" \) -o \( ! -e config.log \) ]
 then
     if ! ${OR1K_TOP}/sim/configure --target=or1k-elf \
