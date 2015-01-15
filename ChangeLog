@@ -1,3 +1,8 @@
+2015-01-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* or1k-build-all.sh: Fixes to comments and help text to fix name
+	of script, and remove use of LLVM.
+
 2015-01-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* or1k-build-all.sh (cd_or_error): New function.

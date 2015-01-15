@@ -1,20 +1,20 @@
 #!/bin/sh
 
-# Build script for the OR1K LLVM tool chain
+# Build script for the OR1K tool chain
 
 # Copyright (C) 2015 Embecosm Limited
 # Contributor Andrew Burgess  <andrew.burgess@embecosm.com>
 
-#		     SCRIPT TO BUILD OR1K LLVM TOOL CHAIN
-#		     ====================================
+#		     SCRIPT TO BUILD OR1K TOOL CHAIN
+#		     ===============================
 
 # Invocation Syntax
 
-#     build-all.sh [--source-dir <source_dir>]
-#                  [--build-dir <build_dir>] [--install-dir <install_dir>]
-#                  [--clean | --no-clean]
-#                  [--datestamp-install]
-#                  [--jobs <count>] [--load <load>] [--single-thread]
+#   or1k-build-all.sh [--source-dir <source_dir>]
+#                     [--build-dir <build_dir>] [--install-dir <install_dir>]
+#                     [--clean | --no-clean]
+#                     [--datestamp-install]
+#                     [--jobs <count>] [--load <load>] [--single-thread]
 
 # This script is a convenience wrapper to build the OR1K tool chain. It
 # is assumed that git repositories are organized as follows:
@@ -216,12 +216,12 @@ case ${opt} in
     ?*)
 	echo "Unknown argument $1"
 	echo
-	echo "Usage: ./build-all.sh [--build-dir <build_dir>]"
-        echo "                      [--install-dir <install_dir>]"
-	echo "                      [--clean | --no-clean]"
-	echo "                      [--datestamp-install]"
-	echo "                      [--jobs <count>] [--load <load>]"
-        echo "                      [--single-thread]"
+	echo "Usage: ./or1k-build-all.sh [--build-dir <build_dir>]"
+        echo "                           [--install-dir <install_dir>]"
+	echo "                           [--clean | --no-clean]"
+	echo "                           [--datestamp-install]"
+	echo "                           [--jobs <count>] [--load <load>]"
+        echo "                           [--single-thread]"
 	exit 1
 	;;
 
