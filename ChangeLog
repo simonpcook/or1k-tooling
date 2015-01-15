@@ -1,5 +1,9 @@
 2015-01-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* or1k-test-all.sh: New file.
+
+2015-01-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* or1k-build-all.sh: Fixes to comments and help text to fix name
 	of script, and remove use of LLVM.
 
