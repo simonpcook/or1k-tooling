@@ -1,5 +1,9 @@
 2015-01-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* or1k-clone-all.sh: It's define-release.sh, not build-release.sh.
+
+2015-01-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* or1k-test-all.sh: New file.
 
 2015-01-15  Andrew Burgess  <andrew.burgess@embecosm.com>

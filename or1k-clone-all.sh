@@ -185,7 +185,7 @@ d=`dirname "$0"`
 OR1K_TOP=`(cd "$d/.." && pwd)`
 export OR1K_TOP
 
-. ${d}/build-release.sh
+. ${d}/define-release.sh
 
 # Set up a logfile
 logfile="${LOGDIR}/or1k-clone-all-$(date -u +%F-%H%M).log"
