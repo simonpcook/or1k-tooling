@@ -239,28 +239,31 @@ rm -f "${logfile}"
 echo "Logging to ${logfile} ..."
 
 # Create the build directories if necessary.
+builddir_binutils=${builddir}/binutils
 builddir_gcc_stage_1=${builddir}/gcc-stage-1
+builddir_newlib=${builddir}/newlib
 builddir_gcc_stage_2=${builddir}/gcc-stage-2
-builddir_binutils_gdb_stage_1=${builddir}/binutils-gdb-stage-1
-builddir_binutils_gdb_stage_2=${builddir}/binutils-gdb-stage-2
 builddir_sim=${builddir}/sim
+builddir_gdb=${builddir}/gdb
 
 if [ "x${doclean}" = "x--clean" ]
 then
     header "Cleaning build directories"
 
+    rm -fr ${builddir_binutils}
     rm -fr ${builddir_gcc_stage_1}
+    rm -fr ${builddir_newlib}
     rm -fr ${builddir_gcc_stage_2}
-    rm -fr ${builddir_binutils_gdb_stage_1}
-    rm -fr ${builddir_binutils_gdb_stage_2}
     rm -fr ${builddir_sim}
+    rm -fr ${builddir_gdb}
 fi
 
+mkdir_or_error -p ${builddir_binutils}
 mkdir_or_error -p ${builddir_gcc_stage_1}
+mkdir_or_error -p ${builddir_newlib}
 mkdir_or_error -p ${builddir_gcc_stage_2}
-mkdir_or_error -p ${builddir_binutils_gdb_stage_1}
-mkdir_or_error -p ${builddir_binutils_gdb_stage_2}
 mkdir_or_error -p ${builddir_sim}
+mkdir_or_error -p ${builddir_gdb}
 
 if [ "x${datestamp}" != "x" ]
 then
@@ -301,52 +304,58 @@ echo "  datestamp=${datestamp}" >> "${logfile}" 2>&1
 #
 #--------------------------------------------------------------------------
 
-header "Configuring binutils-gdb (stage 1)"
-cd_or_error ${builddir_binutils_gdb_stage_1}
-if [ \( "x${doclean}" = "x--clean" \) -o \( ! -e config.log \) ]
-then
-    if ! ${OR1K_TOP}/binutils-gdb/configure --target=or1k-elf \
-         --prefix=${installdir} \
-         --enable-shared --disable-itcl --disable-tk --disable-tcl \
-         --disable-winsup --disable-gdbtk --disable-libgui \
-         --disable-rda --disable-sid --disable-sim --disable-gdb \
-         --with-sysroot --disable-newlib --disable-libgloss \
-         --disable-werror >> ${logfile} 2>&1
-    then
-        echo "ERROR: Configuration of binutils-gdb (stage 1) failed."
-        echo "- see ${logfile}"
-        exit 1
-    fi
-fi
-
-header "Building binutils-gdb (stage 1)"
-if ! make ${parallel} >> ${logfile} 2>&1
-then
-    echo "ERROR: Build of binutils-gdb (stage 1) failed."
-    echo "- see ${logfile}"
-    exit 1
-fi
-
-header "Installing binutils-gdb (stage 1)"
-if ! make install >> ${logfile} 2>&1
-then
-    echo "ERROR: Install of binutils-gdb (stage 1) failed."
-    echo "- see ${logfile}"
-    exit 1
-fi
+TARGET=or1k-elf
+export TARGET
 
 # Setup the PATH to find installed components.
 PATH=${installdir}/bin:$PATH
 export PATH
 
+# ----- binutils -----
+
+header "Configuring binutils"
+cd_or_error ${builddir_binutils}
+if [ \( "x${doclean}" = "x--clean" \) -o \( ! -e config.log \) ]
+then
+    if ! ${OR1K_TOP}/binutils/configure --target=${TARGET} \
+         --prefix=${installdir} \
+         --enable-shared --disable-itcl --disable-tk --disable-tcl \
+         --disable-winsup --disable-gdbtk --disable-libgui \
+         --disable-rda --disable-sid --disable-sim --disable-gdb \
+         --with-sysroot --with-system-zlib >> ${logfile} 2>&1
+    then
+        echo "ERROR: Configuration of binutils failed."
+        echo "- see ${logfile}"
+        exit 1
+    fi
+fi
+
+header "Building binutils"
+if ! make ${parallel} >> ${logfile} 2>&1
+then
+    echo "ERROR: Build of binutils failed."
+    echo "- see ${logfile}"
+    exit 1
+fi
+
+header "Installing binutils"
+if ! make install >> ${logfile} 2>&1
+then
+    echo "ERROR: Install of binutils failed."
+    echo "- see ${logfile}"
+    exit 1
+fi
+
+# ----- GCC ( Stage 1 ) -----
+
 header "Configuring GCC (stage 1)"
 cd_or_error ${builddir_gcc_stage_1}
 if [ \( "x${doclean}" = "x--clean" \) -o \( ! -e config.log \) ]
 then
-    if ! ${OR1K_TOP}/gcc/configure --target=or1k-elf \
+    if ! ${OR1K_TOP}/gcc/configure --target=${TARGET} \
          --prefix=${installdir} \
          --enable-languages=c --disable-shared \
-         --disable-libssp --disable-werror >> ${logfile} 2>&1
+         --disable-libssp >> ${logfile} 2>&1
     then
         echo "ERROR: Configuration of GCC (stage 1) failed."
         echo "- see ${logfile}"
@@ -370,49 +379,47 @@ then
     exit 1
 fi
 
-header "Configuring binutils-gdb (stage 2)"
-cd_or_error ${builddir_binutils_gdb_stage_2}
+# ----- newlib -----
+
+header "Configuring newlib"
+cd_or_error ${builddir_newlib}
 if [ \( "x${doclean}" = "x--clean" \) -o \( ! -e config.log \) ]
 then
-    if ! ${OR1K_TOP}/binutils-gdb/configure --target=or1k-elf \
-         --prefix=${installdir} \
-         --enable-shared --disable-itcl --disable-tk \
-         --disable-tcl --disable-winsup --disable-gdbtk \
-         --disable-libgui --disable-rda --disable-sid \
-         --enable-sim --disable-or1ksim --enable-gdb  \
-         --with-sysroot --enable-newlib --enable-libgloss \
-         --disable-werror >> ${logfile} 2>&1
+    if ! ${OR1K_TOP}/newlib/configure --target=${TARGET} \
+         --prefix=${installdir} >> ${logfile} 2>&1
     then
-        echo "ERROR: Configuration of binutils-gdb (stage 2) failed."
+        echo "ERROR: Configuration of newlib failed."
         echo "- see ${logfile}"
         exit 1
     fi
 fi
 
-header "Building binutils-gdb (stage 2)"
+header "Building newlib"
 if ! make ${parallel} >> ${logfile} 2>&1
 then
-    echo "ERROR: Build of binutils-gdb (stage 2) failed."
+    echo "ERROR: Build of newlib failed."
     echo "- see ${logfile}"
     exit 1
 fi
 
-header "Installing binutils-gdb (stage 2)"
+header "Installing newlib"
 if ! make install >> ${logfile} 2>&1
 then
-    echo "ERROR: Install of binutils-gdb (stage 2) failed."
+    echo "ERROR: Install of newlib failed."
     echo "- see ${logfile}"
     exit 1
 fi
+
+# ----- GCC ( Stage 2 ) -----
 
 header "Configuring GCC (stage 2)"
 cd_or_error ${builddir_gcc_stage_2}
 if [ \( "x${doclean}" = "x--clean" \) -o \( ! -e config.log \) ]
 then
-    if ! ${OR1K_TOP}/gcc/configure --target=or1k-elf \
+    if ! ${OR1K_TOP}/gcc/configure --target=${TARGET} \
          --prefix=${installdir} \
          --enable-languages=c,c++ --disable-shared --disable-libssp \
-         --with-newlib --disable-werror >> ${logfile} 2>&1
+         --with-newlib >> ${logfile} 2>&1
     then
         echo "ERROR: Configuration of GCC (stage 2) failed."
         echo "- see ${logfile}"
@@ -436,11 +443,13 @@ then
     exit 1
 fi
 
+# ----- sim -----
+
 header "Configuring or1k sim"
 cd_or_error ${builddir_sim}
 if [ \( "x${doclean}" = "x--clean" \) -o \( ! -e config.log \) ]
 then
-    if ! ${OR1K_TOP}/sim/configure --target=or1k-elf \
+    if ! ${OR1K_TOP}/sim/configure --target=${TARGET} \
          --prefix=${installdir} --enable-ethpy \
          >> ${logfile} 2>&1
     then
@@ -462,6 +471,42 @@ header "Installing or1k sim"
 if ! make install >> ${logfile} 2>&1
 then
     echo "ERROR: Install or1k sim failed."
+    echo "- see ${logfile}"
+    exit 1
+fi
+
+# ----- gdb -----
+
+header "Configuring gdb"
+cd_or_error ${builddir_gdb}
+if [ \( "x${doclean}" = "x--clean" \) -o \( ! -e config.log \) ]
+then
+    if ! ${OR1K_TOP}/gdb/configure --target=${TARGET} \
+         --prefix=${installdir} --enable-shared --disable-itcl \
+         --disable-tk --disable-tcl --disable-winsup --disable-gdbtk \
+         --disable-gas --disable-ld --disable-gprof --disable-binutils \
+         --disable-libgui --disable-rda --disable-sid --enable-sim \
+         --disable-or1ksim --enable-gdb  --with-sysroot --disable-newlib \
+         --disable-libgloss >> ${logfile} 2>&1
+    then
+        echo "ERROR: Configuration of gdb failed."
+        echo "- see ${logfile}"
+        exit 1
+    fi
+fi
+
+header "Building gdb"
+if ! make ${parallel} >> ${logfile} 2>&1
+then
+    echo "ERROR: Build of gdb failed."
+    echo "- see ${logfile}"
+    exit 1
+fi
+
+header "Installing gdb"
+if ! make install >> ${logfile} 2>&1
+then
+    echo "ERROR: Install gdb failed."
     echo "- see ${logfile}"
     exit 1
 fi

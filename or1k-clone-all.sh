@@ -99,15 +99,14 @@ parse_args () {
 # remote called "upstream".
 
 # @param $1  Name of the tool
-# @param $2  Name of the repo
-# @param $3  (Optional) URL of upstream repo (minus tool name and .git)
+# @param $2  Organisation name.
+# @param $3  Name of the repo
+# @param $4  (Optional) URL of upstream repo (minus tool name and .git)
 # @return 0 on success, 1 on failure to clone or fetch
 clone_tool () {
     tool=$1
-    repo=$2
-    upstream=$3
-    ssh_repo="${ssh_prefix}${org}/${repo}.git"
-    http_repo="${http_prefix}${org}/${repo}.git"
+    remote_name=$2
+    remote_url=$3
 
     echo "Cloning ${tool}..." | tee -a ${logfile}
 
@@ -124,53 +123,25 @@ clone_tool () {
 	return 1
     fi
 
-    # Clone the or1k repo
-    if [ ${is_dev} = "false" ] \
-	|| ! git clone -q -o or1k ${ssh_repo} ${tool} >> ${logfile} 2>&1
+    if [ ${is_dev} = "true" ]
     then
-	if ! git clone -q -o or1k ${http_repo} ${tool} >> ${logfile} 2>&1
-	then
-	    echo "Warning: Failed to clone ${http_repo}" | tee -a ${logfile}
-	    return 1
-	else
-	    echo "- successfully cloned or1k ${tool} repository" \
-		| tee -a ${logfile}
-	fi
-    else
-	echo "- successfully cloned or1k ${tool} repository (dev)" \
+	echo "Warning: --dev parameter currently ignored, manually update remote URLs." \
 	    | tee -a ${logfile}
     fi
 
-    # Optionally add the upstream repository and fetch it
-    if [ ${is_dev} = "true" -a "x${upstream}" != "x" ]
+    # Clone the repository
+    if ! git clone -q -o ${remote_name} ${remote_url} ${tool} >> ${logfile} 2>&1
     then
-	cd ${tool}
-	# Add
-	if ! git remote add upstream ${upstream}${repo}.git
-	then
-	    echo "Warning: failed to add ${upstream}${repo}.git as remote" \
-		| tee -a ${logfile}
-	    return 1
-	fi
-	# Fetch
-	if git fetch -q upstream >> ${logfile} 2>&1
-	then
-	    echo "- successfully fetched upstream ${tool} repository" \
-		| tee -a ${logfile}
-	else
-	    echo "Warning: failed to fetch upstream ${tool} repository" \
-		| tee -a ${logfile}
-	    echo "- manually run 'git fetch upstream'" | tee -a ${logfile}
-	    return 1
-	fi
+	echo "Warning: Failed to clone ${remote_url} for ${tool}" | tee -a ${logfile}
+	return 1
+    else
+	echo "- successfully cloned ${tool} repository" \
+	    | tee -a ${logfile}
     fi
 }
 
 # -----------------------------------------------------------------------------
 # Main script
-http_prefix=https://github.com/
-ssh_prefix=git@github.com:
-org=openrisc
 
 # Get the args
 if ! parse_args $*
@@ -199,7 +170,7 @@ td=${OR1K_TOP}/clone-test-dir
 rm -rf ${td}
 if mkdir ${td} >> ${logfile} 2>&1
 then
-    rm -rf ${td}
+    rmdir ${td}
 else
     echo "ERROR: Cannot create repository directories" | tee -a ${logfile}
     exit 1
@@ -209,10 +180,11 @@ fi
 # optimize by just coping the binutils directory to gdb, but this is
 # something you only do once, and this keeps it simpler.
 status="ok"
-clone_tool dejagnu      or1k-dejagnu ""                           || status="failed"
-clone_tool binutils-gdb or1k-src     git://sourceware.org/git/    || status="failed"
-clone_tool gcc          or1k-gcc     https://github.com/mirrors/  || status="failed"
-clone_tool sim          or1ksim      ""                           || status="failed"
+clone_tool dejagnu   or1k https://github.com/openrisc/or1k-dejagnu.git || status="failed"
+clone_tool binutils  gnu  git://sourceware.org/git/binutils-gdb.git    || status="failed"
+clone_tool gdb       or1k https://github.com/openrisc/or1k-src.git     || status="failed"
+clone_tool gcc       or1k https://github.com/openrisc/or1k-gcc.git     || status="failed"
+clone_tool sim       or1k https://github.com/openrisc/or1ksim.git      || status="failed"
 
 # All done
 if [ "${status}" = "ok" ]

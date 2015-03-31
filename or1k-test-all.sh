@@ -287,44 +287,47 @@ cat ${gitverfile}
 #
 #------------------------------------------------------------------------------
 
-binutils_gdb_test_dir=${builddir}/binutils-gdb-stage-2
+binutils_test_dir=${builddir}/binutils
+gas_test_dir=${builddir}/binutils
+ld_test_dir=${builddir}/binutils
 gcc_test_dir=${builddir}/gcc-stage-2
 sim_test_dir=${builddir}/sim
+gdb_test_dir=${builddir}/gdb
 
-if [ "x${do_binutils}" = "x--binutils" -a -d "${binutils_gdb_test_dir}" ]
+if [ "x${do_binutils}" = "x--binutils" -a -d "${binutils_test_dir}" ]
 then
     header "Running binutils tests"
-    cd_or_error "${binutils_gdb_test_dir}"
+    cd_or_error "${binutils_test_dir}"
     # TODO: Consider using ${parallel} here.
     make check-binutils >> ${logfile} 2>&1
     header "Saving binutils results"
     save_results binutils/binutils
 fi
 
-if [ "x${do_ld}" = "x--ld" -a -d "${binutils_gdb_test_dir}" ]
+if [ "x${do_ld}" = "x--ld" -a -d "${ld_test_dir}" ]
 then
     header "Running ld tests"
-    cd_or_error "${binutils_gdb_test_dir}"
+    cd_or_error "${ld_test_dir}"
     # TODO: Consider using ${parallel} here.
     make check-ld >> ${logfile} 2>&1
     header "Saving ld results"
     save_results ld/ld
 fi
 
-if [ "x${do_gas}" = "x--gas" -a -d "${binutils_gdb_test_dir}" ]
+if [ "x${do_gas}" = "x--gas" -a -d "${gas_test_dir}" ]
 then
     header "Running gas tests"
-    cd_or_error "${binutils_gdb_test_dir}"
+    cd_or_error "${gas_test_dir}"
     # TODO: Consider using ${parallel} here.
     make check-gas >> ${logfile} 2>&1
     header "Saving gas results"
     save_results gas/testsuite/gas
 fi
 
-if [ "x${do_gdb}" = "x--gdb" -a -d "${binutils_gdb_test_dir}" ]
+if [ "x${do_gdb}" = "x--gdb" -a -d "${gdb_test_dir}" ]
 then
     header "Running gdb tests"
-    cd_or_error "${binutils_gdb_test_dir}"
+    cd_or_error "${gdb_test_dir}"
     make ${parallel} check-gdb >> ${logfile} 2>&1
     header "Saving gdb results"
     save_results gdb/testsuite/gdb

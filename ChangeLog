@@ -1,3 +1,17 @@
+2015-03-31  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	Update to make use of upstream repositories where possible.
+	* or1k-clone-all.sh: Split cloning of binutils and gdb in order to
+	pull from different upstream repositories.  Simplify the
+	clone_tool function in order to make handling different remotes
+	easier.
+	* or1k-test-all.sh: Take account of different binutils and gdb
+	directories.  Allow gas/ld/binutils/gdb to each have a different
+	path, currently only gdb does.
+	* or1k-build-all.sh: Updated based on new upstream instructions.
+	Includes build of newlib, build binutils without gdb from
+	upstream, and then build gdb separately from or1k repository.
+
 2015-01-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* or1k-clone-all.sh: It's define-release.sh, not build-release.sh.
